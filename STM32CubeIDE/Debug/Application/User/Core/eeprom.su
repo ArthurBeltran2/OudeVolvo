@@ -1,0 +1,4 @@
+eeprom.c:125:15:UnlockPELOCK	8	static
+eeprom.c:149:15:LockNVM	8	static
+eeprom.c:170:15:EepromErase	16	static,ignoring_inline_asm
+eeprom.c:208:6:FLASH_IRQHandler	8	static

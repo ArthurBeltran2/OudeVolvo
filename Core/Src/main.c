@@ -20,6 +20,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -42,16 +43,31 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+
+	/*pas hier uw tijden aan*/
+	 int Heengaandetijd = 1000; //1000ms
+	 int Teruggaandetijd = 1000; //1000ms
+	 int Wachttijdnaheengaan = 500;     /* 600ms  Vereiste: Wachtijdnaheengaan >= deadtime*/
+	 int Wachttijdnaterugkomen = 2000; /*1500ms Vereiste: Wachtijdnaterugkomen >= deadtime*/
+
+
+	 /* default values - don't change*/
  	 int Period = 2000; 	// 1000ms
- 	 int DeadTime = 100;	//	100ms
+ 	 int DeadTime = 50;	//	100ms
  	 int SwitchoverTime1 =600; //500ms
 	 int SwitchoverTime2 =1500; //2000ms
+
+	 /*variables used to program eeprom*/
+//	 static uint16_t error = 0;
+// uint32_t test_to_be_performed_twice = 1; //this variable is set to 2 if the first address of the page to erase is yet erased
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
+
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -96,6 +112,18 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
   	  //LL_mDelay(DeadTime); // for safety reasons. To make sure minimum time between toggeling relays
+  if (Wachttijdnaheengaan < DeadTime)
+  	  {
+	  	  Wachttijdnaheengaan = DeadTime;
+  	  }
+  if (Wachttijdnaterugkomen < DeadTime)
+	  {
+	  	  Wachttijdnaterugkomen = DeadTime;
+	  }
+  Period = Heengaandetijd + Teruggaandetijd + (2*DeadTime);
+  SwitchoverTime1 =Wachttijdnaheengaan-DeadTime;
+  SwitchoverTime2 =Wachttijdnaterugkomen-DeadTime;
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -117,7 +145,7 @@ int main(void)
  * 					  t0|				    t2|					t0|					t2|
  *						t1					  t3				  t1				  t3
  *
- *						|<--------------1 period------------------>|
+ *						|<--------------1 period--------------->|
  *					  |-| deadtime
  *
  *Period = 1 cycle in milliseconds where motor turned up and down
@@ -133,25 +161,66 @@ int main(void)
 	      LL_mDelay(SwitchoverTime2);
 	  // @ t = t1
 	  	  LL_GPIO_TogglePin(GPIOA, LL_GPIO_PIN_1);
+	  	LL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
 	  	  LL_mDelay((Period/2)-DeadTime);
 	  // @ t = t2
 	  	  LL_GPIO_TogglePin(GPIOA, LL_GPIO_PIN_1);
+	  	LL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
 	  	  LL_mDelay(DeadTime);
 	  	  LL_mDelay(SwitchoverTime1);
 	  // @ t = t3
 	   	  LL_GPIO_TogglePin(GPIOA, LL_GPIO_PIN_4);
 	   	  LL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
 	   	  LL_mDelay((Period/2)-DeadTime);
-
-
-	  // Write a byte to EEPROM
-
-
     /* USER CODE END WHILE */
-
 
     /* USER CODE BEGIN 3 */
   }
+
+
+  // Write a byte to EEPROM
+//    UnlockPELOCK();
+//    FLASH->PECR |= FLASH_PECR_ERRIE | FLASH_PECR_EOPIE; /* enable flash interrupts */
+    /* Check if the first address of the page is yet erased,this is only for this example */
+/*    if (*(uint32_t *)(DATA_E2_ADDR) == (uint32_t)0)
+     {
+      test_to_be_performed_twice = 2;
+    }
+
+    while (test_to_be_performed_twice-- > 0)
+    {
+      EepromErase(DATA_E2_ADDR);
+      __WFI();
+      if (*(uint32_t *)(DATA_E2_ADDR) != (uint32_t)0)
+      {
+        error |= ERROR_ERASE;
+      }
+*/
+      /* Perform data programming */
+      /* (1) Write in data EEPROM */
+//     *(uint8_t *)(DATA_E2_ADDR+1) = DATA_BYTE; /* (1) */
+/*      __WFI();
+      if  (*(uint8_t *)(DATA_E2_ADDR+1) != DATA_BYTE)
+      {
+        error |= ERROR_PROG_BYTE;
+      }
+*/
+ //     *(uint16_t *)(DATA_E2_ADDR+2) = DATA_16B_WORD; /* (1) */
+/*      __WFI();
+      if  (*(uint32_t *)(DATA_E2_ADDR) != ((DATA_BYTE << 8) + (DATA_16B_WORD << 16) ))
+      {
+        error |= ERROR_PROG_16B_WORD;
+      }
+*/
+//      *(uint32_t *)(DATA_E2_ADDR) = DATA_32B_WORD; /* (1) */
+/*      __WFI();
+      if  (*(uint32_t *)(DATA_E2_ADDR) != DATA_32B_WORD)
+      {
+        error |= ERROR_PROG_32B_WORD;
+      }
+    }
+    LockNVM();
+*/
   /* USER CODE END 3 */
 }
 
@@ -412,74 +481,6 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-/**
-  * Brief   This function unlocks the data EEPROM and the FLASH_PECR.
-  *         The data EEPROM will be ready to be erased or programmed
-  *         but the program memory will be still locked till PRGLOCK is set.
-  *         It first checks no flash operation is on going,
-  *         then unlocks PELOCK if it is locked.
-  * Param   None
-  * Retval  None
-  */
-__INLINE void UnlockPELOCK(void)
-{
-  /* (1) Wait till no operation is on going */
-  /* (2) Check if the PELOCK is unlocked */
-  /* (3) Perform unlock sequence */
-  while ((FLASH->SR & FLASH_SR_BSY) != 0) /* (1) */
-  {
-    /* For robust implementation, add here time-out management */
-  }
-  if ((FLASH->PECR & FLASH_PECR_PELOCK) != 0) /* (2) */
-  {
-    FLASH->PEKEYR = FLASH_PEKEY1; /* (3) */
-    FLASH->PEKEYR = FLASH_PEKEY2;
-  }
-}
-
-
-/**
-  * Brief   This function locks the NVM.
-  *         It first checks no flash operation is on going,
-  *         then locks the flash.
-  * Param   None
-  * Retval  None
-  */
-__INLINE void LockNVM(void)
-{
-  /* (1) Wait till no operation is on going */
-  /* (2) Locks the NVM by setting PELOCK in PECR */
-  while ((FLASH->SR & FLASH_SR_BSY) != 0) /* (1) */
-  {
-    /* For robust implementation, add here time-out management */
-  }
-  FLASH->PECR |= FLASH_PECR_PELOCK; /* (2) */
-}
-
-/**
-  * Brief   This function erases a word of data EEPROM.
-  *         The ERASE bit and DATA bit are set in PECR at the beginning
-  *         and reset at the endof the function. In case of successive erase,
-  *         these two operations could be performed outside the function.
-  *         The flash interrupts must have been enabled prior to call
-  *         this function.
-  * Param   addr is the 32-bt word address to erase
-  * Retval  None
-  */
-__INLINE void EepromErase(uint32_t addr)
-{
-  /* (1) Set the ERASE and DATA bits in the FLASH_PECR register
-         to enable page erasing */
-  /* (2) Write a 32-bit word value at the desired address
-         to start the erase sequence */
-  /* (3) Enter in wait for interrupt. The EOP check is done in the Flash ISR */
-  /* (6) Reset the ERASE and DATA bits in the FLASH_PECR register
-         to disable the page erase */
-  FLASH->PECR |= FLASH_PECR_ERASE | FLASH_PECR_DATA; /* (1) */
-  *(__IO uint32_t *)addr = (uint32_t)0; /* (2) */
-  __WFI(); /* (3) */
-  FLASH->PECR &= ~(FLASH_PECR_ERASE | FLASH_PECR_DATA); /* (4) */
-}
 
 
 /* USER CODE END 4 */

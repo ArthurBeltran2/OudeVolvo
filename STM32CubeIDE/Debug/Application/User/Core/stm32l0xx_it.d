@@ -1,6 +1,6 @@
 Application/User/Core/stm32l0xx_it.o: \
  /home/arthur/uitwisselmap/ST/projecten/OudeVolvo/Core/Src/stm32l0xx_it.c \
- ../../Core/Inc/main.h \
+ /home/arthur/uitwisselmap/ST/projecten/OudeVolvo/STM32CubeIDE/Application/User/Includes/main.h \
  ../../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_ll_crs.h \
  ../../Drivers/CMSIS/Device/ST/STM32L0xx/Include/stm32l0xx.h \
  ../../Drivers/CMSIS/Device/ST/STM32L0xx/Include/stm32l031xx.h \
@@ -19,9 +19,10 @@ Application/User/Core/stm32l0xx_it.o: \
  ../../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_ll_dma.h \
  ../../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_ll_usart.h \
  ../../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_ll_gpio.h \
- ../../Core/Inc/stm32l0xx_it.h
+ /home/arthur/uitwisselmap/ST/projecten/OudeVolvo/STM32CubeIDE/Application/User/Includes/eeprom.h \
+ /home/arthur/uitwisselmap/ST/projecten/OudeVolvo/STM32CubeIDE/Application/User/Includes/stm32l0xx_it.h
 
-../../Core/Inc/main.h:
+/home/arthur/uitwisselmap/ST/projecten/OudeVolvo/STM32CubeIDE/Application/User/Includes/main.h:
 
 ../../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_ll_crs.h:
 
@@ -59,4 +60,6 @@ Application/User/Core/stm32l0xx_it.o: \
 
 ../../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_ll_gpio.h:
 
-../../Core/Inc/stm32l0xx_it.h:
+/home/arthur/uitwisselmap/ST/projecten/OudeVolvo/STM32CubeIDE/Application/User/Includes/eeprom.h:
+
+/home/arthur/uitwisselmap/ST/projecten/OudeVolvo/STM32CubeIDE/Application/User/Includes/stm32l0xx_it.h:

@@ -1,3 +1,4 @@
+"Application/User/Core/eeprom.o"
 "Application/User/Core/main.o"
 "Application/User/Core/stm32l0xx_it.o"
 "Application/User/Core/syscalls.o"
